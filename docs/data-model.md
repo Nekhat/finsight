@@ -105,7 +105,8 @@ CREATE TABLE transactions (
 CREATE INDEX idx_transactions_user_date ON transactions (user_id, txn_date DESC);
 CREATE INDEX idx_transactions_category ON transactions (category_id);
 CREATE INDEX idx_categories_user ON categories (user_id);
-
+```
+---
 
 ## 6. Sample Data (Initial Population)
 -- Users
@@ -147,6 +148,8 @@ VALUES
 (3, 10, 30.00, '2025-09-09', 'Miscellaneous'),
 (3, 8, 2800.00, '2025-09-05', 'Salary');
 
+
+---
 
 ## 7. Notes
 
