@@ -13,19 +13,28 @@ Make sure the following tools are installed:
 - Postman (optional, for API testing)
 
 
-## 2. Clone Repository
-
-git clone https://github.com/
+## 2. Clone the Repository
+- Open a terminal or command prompt and run the following command to clone the repo:
+````
+git clone <git-repo-url>
+````
+- Git will create a folder with the same name as your repository. This is your project folder.
+- Navigate into the project folder:
+````
 cd your-project-folder
-
+````
 
 ## 3. Database MySQL Setup
 ### 3.1 Create Database
 - Log into MySQL:
+````
 mysql -u root -p
+````
 
 - Create DB:
+````
   CREATE DATABASE expense_tracker;
+````
 
 ## 4. Configure Application Properties
 ### 4.1 Edit src/main/resources/application.properties
@@ -42,28 +51,38 @@ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
 springdoc.api-docs.enabled=true
 springdoc.swagger-ui.enabled=true
 ```
-🔐 **Environment Variables (Optional)**
+**Environment Variables (Optional)**
 Instead of storing the DB password in the file, you can set it:
 - macOS/Linux:
+````
   export DB_PASSWORD=yourpassword
+````
 - Windows PowerShell:
+````
   setx DB_PASSWORD "yourpassword"
+````
 - Then update config as:
 ```properties
 spring.datasource.password=${DB_PASSWORD}
 ```
 ## 5. Build and Run the Spring Boot App
 ### 5.1 Run with Maven
+````
 mvn spring-boot:run
+````
 
 ### 5.2 Run from IntelliJ
 - Open IntelliJ → “Run” → “Run ExpenseTrackerApplication”
 - The application will start on:
+````
   http://localhost:8080
+````
 
 ## 6. Access Swagger UI
 Once the application is running, open:
-👉 http://localhost:8080/swagger-ui.html
+````
+http://localhost:8080/swagger-ui.html
+````
 
 Here we will see:
 - All API endpoints
@@ -73,8 +92,10 @@ Here we will see:
 ## 7. Verify Database Tables
 When the app runs for the first time, Hibernate will create the tables automatically.
 Login to MySQL and check:
+````
 USE expense_tracker;
 SHOW TABLES;
+````
 
 We should see:
 - user
@@ -97,4 +118,6 @@ When authentication is added later, we will create more environment variables:
 - JWT_EXPIRATION
 - JWT_REFRESH_EXPIRATION
 These will be set in our OS and accessed using:
+````
   jwt.secret=${JWT_SECRET}
+````
