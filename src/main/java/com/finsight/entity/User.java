@@ -89,29 +89,3 @@ public class User
         this.preferredCurrency = preferred_currency;
     }
 }
-/*
-    //Getters
-    public Integer getId() { return id; }
-    public String getName() { return name; }
-    public String getEmail() { return email; }
-    public LocalDate getDob() { return dob; }
-    public Integer getAge() { return age; }
-
-    //Setters
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setDob(LocalDate dob) {
-        this.dob = dob;
-    }
-
-    public void setAge(Integer age) {
-        this.age = age;
-    }
-}
-*/
