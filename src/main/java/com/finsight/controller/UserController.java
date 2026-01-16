@@ -1,5 +1,7 @@
 package com.finsight.controller;
 
+import com.finsight.dto.LoginRequest;
+import com.finsight.dto.LoginResponse;
 import com.finsight.dto.UserRegisterRequest;
 import com.finsight.dto.UserResponse;
 import com.finsight.entity.User;
@@ -41,5 +43,20 @@ public class UserController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    @PostMapping("/users/login")
+    public ResponseEntity<LoginResponse> loginUser(
+            @RequestBody LoginRequest loginRequest) {
+
+     User user = userService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
+
+     LoginResponse response = new LoginResponse(
+             user.getId(),
+             user.getName(),
+             user.getEmail()
+     );
+
+     return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

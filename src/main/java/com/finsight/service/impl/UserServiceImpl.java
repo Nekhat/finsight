@@ -46,9 +46,9 @@ public class UserServiceImpl  implements UserService {
 
         Optional<User> optionalUser= userRepository.findByEmail(email);
         User user = optionalUser.orElseThrow(() ->
-                new RuntimeException("User not found"));
+                new RuntimeException("Invalid email or password"));
         if(!user.getPassword().equals(password)){
-            throw new RuntimeException("Invalid Password");
+            throw new RuntimeException("Invalid email or password");
         }
 
         return user;
