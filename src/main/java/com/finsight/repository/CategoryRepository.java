@@ -1,4 +1,4 @@
 package com.finsight.repository;
 
-public class CategoryRepository {
+public interface CategoryRepository {
 }
