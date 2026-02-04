@@ -1,4 +1,17 @@
 package com.finsight.dto;
 
 public class CategoryUpdateRequest {
+
+    private String name;
+
+    public CategoryUpdateRequest(){
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }
