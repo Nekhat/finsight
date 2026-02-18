@@ -6,55 +6,75 @@ import com.finsight.dto.CategoryUpdateRequest;
 import com.finsight.dto.LoginRequest;
 import com.finsight.entity.Category;
 import com.finsight.entity.User;
+import com.finsight.repository.UserRepository;
 import com.finsight.service.CategoryService;
+import com.finsight.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("/categories")
+@RequestMapping("/api/users/{userId}/categories")
 public class CategoryController {
 
     private final CategoryService categoryService;
+    private final UserService userService;
 
-    public CategoryController(CategoryService categoryService){
+    public CategoryController(CategoryService categoryService, UserService userService){
         this.categoryService = categoryService;
+        this.userService = userService;
+
     }
 
     @PostMapping
     public ResponseEntity<CategoryResponse> createCategory(
-            @RequestBody CategoryCreateRequest request,
-            @AuthenticationPrincipal User user){
+            @PathVariable Integer userId,
+            @RequestBody CategoryCreateRequest request){
+
+        User user = getUserOrThrow(userId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.createCategory(request, user));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{categoryId}")
     public ResponseEntity<CategoryResponse> updateCategory(
-            @PathVariable Integer id,
-            @RequestBody CategoryUpdateRequest request,
-            @AuthenticationPrincipal User user){
+            @PathVariable Integer userId,
+            @PathVariable Integer categoryId,
+            @RequestBody CategoryUpdateRequest request){
 
-        return ResponseEntity.ok(categoryService.updateCategory(id, request, user));
+        User user = getUserOrThrow(userId);
+
+        return ResponseEntity.ok(categoryService.updateCategory(categoryId, request, user));
     }
 
     @GetMapping
     public  ResponseEntity<List<CategoryResponse>> getAllCategories(
-            @AuthenticationPrincipal User user){
+            @PathVariable Integer userId){
+
+        User user = getUserOrThrow(userId);
 
         return ResponseEntity.ok(categoryService.getAllCategories(user));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{categoryId}")
     public ResponseEntity<Void> deleteCategory(
-            @PathVariable Integer id,
-            @AuthenticationPrincipal User user){
+            @PathVariable Integer userId,
+            @PathVariable Integer categoryId){
 
-        categoryService.deleteCategory(id, user);
+        User user = getUserOrThrow(userId);
+
+        categoryService.deleteCategory(categoryId, user);
         return ResponseEntity.noContent().build();
-    }   
+    }
+
+    // Helper Method
+    private User getUserOrThrow(Integer userId) {
+        return userService.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
 
 }
