@@ -8,4 +8,5 @@ public interface UserService {
     User registerUser(User user);
     User authenticate(String email, String password);
     Optional<User> getUserByEmail(String email);
+    Optional<User> findById(Integer userId);
 }
