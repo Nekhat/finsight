@@ -1,7 +1,5 @@
 package com.finsight.dto;
 
-import com.finsight.entity.User;
-
 public class UserRegisterRequest {
     private String name;
     private String email;
