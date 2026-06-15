@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CategoryServiceImpl implements CategoryService{
@@ -78,6 +79,25 @@ public class CategoryServiceImpl implements CategoryService{
         }
 
         return categoryResponseList;
+    }
+
+    @Override
+    public CategoryResponse getCategoryById(Integer userId, Integer categoryId){
+
+        Category category = categoryRepository.
+                findByIdAndUserIdOrIdAndIsGlobalTrue(categoryId, userId, categoryId)
+                .orElseThrow(() ->
+                        new RuntimeException("Category not found or not accessible"));
+
+        CategoryResponse categoryResponse = new CategoryResponse(
+                category.getId(),
+                category.getName(),
+                category.getType(),
+                category.isGlobal()
+        );
+
+        return categoryResponse;
+
     }
 
     @Override

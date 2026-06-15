@@ -10,7 +10,7 @@ public class LoginResponse {
     public LoginResponse(Integer id, String name, String email){
         this.id = id;
         this.name = name;
-        this.name = email;
+        this.email = email;
     }
 
     // Getters

@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/api/users")
 public class UserController {
 
     private final UserService userService;
@@ -20,7 +21,7 @@ public class UserController {
     }
 
 
-    @PostMapping("/users/register")
+    @PostMapping("/register")
     public ResponseEntity<UserResponse> registerUser(
             @RequestBody UserRegisterRequest request) {
 
@@ -45,7 +46,7 @@ public class UserController {
                 .body(response);
     }
 
-    @PostMapping("/users/login")
+    @PostMapping("/login")
     public ResponseEntity<LoginResponse> loginUser(
             @RequestBody LoginRequest loginRequest) {
 

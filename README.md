@@ -5,6 +5,7 @@
 ## Table of Contents
 - [Overview](#overview)
 - [Phase 1 Status](#phase-1-status)
+- [Phase 2 Status](#phase-2-status)
 - [Documentation](#documentation)
 - [Project Setup](#project-setup)
 - [Future Enhancements](#future-enhancements)
@@ -44,6 +45,63 @@ Phase 1 included the following deliverables:
 
 ---
 
+## Phase 2 Status
+**Phase 2 (Core Backend Implementation) – Implemented and partially tested**
+
+Phase 2 expanded the application from project skeleton (Phase 1) into a working backend with core financial-tracking modules.
+
+### What was built
+
+**User & Authentication**
+- User entity, repository, service, and controller
+- Signup API with email/password validation and uniqueness checks
+- Login API with basic authentication (email/password verification)
+- Unit tests for core user APIs
+
+**Category Management**
+- Category entity supporting both global (system-defined) and user-defined categories
+- Full CRUD APIs: create, update (name only), delete, and fetch (global + user-specific)
+- Business rules implemented:
+  - Category type (INCOME/EXPENSE) is immutable after creation
+  - Category names are unique per user (case-insensitive) and cannot clash with global categories
+  - Categories cannot be deleted if linked transactions exist
+
+**Transaction Management**
+- Transaction entity with intent-based domain methods (no raw setters), JPA lifecycle callbacks for audit fields, and lazy relationships
+- Type is derived from the linked category (income/expense)
+- Validation rules: amount must be positive, date cannot be in the future, category must be global or owned by the user
+- Immutable fields: category, type, user — only amount, date, and notes can be updated
+- Full layered implementation: entity, DTOs, repository, service, and controller
+
+**Dashboard / Reporting**
+- Read-only dashboard endpoint (`GET /dashboard?userId={id}&month={m}&year={y}`)
+- Aggregated via custom JPQL queries on the Transaction repository — no separate entity or table
+- Returns: total income, total expense, net balance, expense breakdown by category, and the 5 most recent transactions
+
+### Architecture & Engineering Decisions
+
+- Followed a strict feature-branch Git workflow (`feature/user-api`, `feature/category-api`, `feature/dashboard-api`) with descriptive, conventional commit messages per layer
+- All business rules and validation enforced in the service layer; controllers remain thin and delegate entirely
+- Repository layer restricted to data access — no business logic
+- Conscious, documented deferrals to keep Phase 2 scoped (see Tech Debt below) rather than over-engineering an MVP
+
+### Testing Status
+
+- **User and Category modules**: Manually tested end-to-end via Postman (signup, login, category CRUD)
+- **Transaction and Dashboard modules**: Implemented and code-complete, but not yet tested
+
+### Tech Debt — Deferred to Phase 3
+
+The following were intentionally deferred to keep Phase 2 focused on core functionality, and are documented for future implementation:
+
+- Password hashing (BCrypt) — currently stored as plain text for development purposes
+- JWT-based authentication and authorization (Spring Security)
+- Bean validation annotations (`@NotBlank`, `@Email`, `@Valid`) across DTOs
+- Custom exception classes (e.g. `UserAlreadyExistsException`, `InvalidCredentialsException`) and a global exception handler (`@ControllerAdvice`)
+- DTO mapper classes (e.g. `UserMapper`) to clean up entity-to-DTO conversion
+- `toString()`, `equals()`, and `hashCode()` overrides on entities
+- Enum-based currency support (currently a plain `String` field)
+
 ## Documentation
 All the Phase 1 documentation is available in the [docs folder](./docs).  
 Each file covers a different aspect of the project:
@@ -70,14 +128,14 @@ Ideas for v2 and advanced features are documented in [future-enhancements.md](./
 
 ---
 
-## Next Steps / Phase 2
-Phase 2 will focus on:
-- Full implementation of authentication & authorization (Spring Security + JWT)
-- Additional features beyond MVP
-- Testing, CI/CD integration, and production readiness
-- Additional documentation if required
+## Next Steps / Phase 3
+Phase 3 will focus on:
+- Completing testing for Transaction and Dashboard modules
+- Implementing security (password hashing, JWT-based authentication & authorization)
+- Adding validation annotations, custom exceptions, and global exception handling
+- Additional features beyond MVP, testing, CI/CD integration, and production readiness
 
-Phase 2 status will be tracked separately once work begins.
+Phase 3 status will be tracked separately once work begins.
 
 ---
 
