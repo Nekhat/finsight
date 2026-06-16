@@ -6,6 +6,7 @@
 - [Overview](#overview)
 - [Phase 1 Status](#phase-1-status)
 - [Phase 2 Status](#phase-2-status)
+- [Key Design Decisions & Learnings](#key-design-decisions--learnings)
 - [Documentation](#documentation)
 - [Project Setup](#project-setup)
 - [Future Enhancements](#future-enhancements)
@@ -101,6 +102,27 @@ The following were intentionally deferred to keep Phase 2 focused on core functi
 - DTO mapper classes (e.g. `UserMapper`) to clean up entity-to-DTO conversion
 - `toString()`, `equals()`, and `hashCode()` overrides on entities
 - Enum-based currency support (currently a plain `String` field)
+
+## Key Design Decisions & Learnings
+
+- **Transaction type is derived, not stored** — a transaction's income/expense type is always
+  determined by its linked category, so storing it separately would risk inconsistency.
+  Delegating via `getType()` enforces a single source of truth.
+
+- **Intent-based domain methods over raw setters** — instead of `setAmount()`, the Transaction
+  entity exposes `updateAmount()`, `updateDate()`, and `updateNotes()` — each with built-in
+  validation. This means business rules live in the entity and cannot be bypassed by any caller.
+
+- **Strict layer separation enforced by design** — controllers stay thin and delegate entirely
+  to services; repositories handle only data access. All business rules (uniqueness checks,
+  ownership validation, deletion guards) live exclusively in the service layer.
+
+- **Deliberate, documented tech debt** — items like JWT authentication, BCrypt password hashing,
+  and global exception handling were intentionally deferred to Phase 3 to keep Phase 2 focused
+  on delivering working core functionality first. Every deferral is documented in the README and
+  inline notes.
+
+---
 
 ## Documentation
 All the Phase 1 documentation is available in the [docs folder](./docs).  
