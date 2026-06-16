@@ -1,51 +1,58 @@
-# Finsight API Contract
+# FinSight API Contract
+
+This document reflects the API surface as actually implemented through Phase 2. It supersedes the original Phase 1 API contract, which was based on a flat `/api/v1` + JWT design that was not the path Phase 2 ultimately took.
 
 ## 1. Base URL
-http://localhost:8080/api/v1
+`http://localhost:8080/api`
 
-## 2. Authentication Overview
-- Token-based authentication (JWT) is used.
-- Signup returns basic user info.
-- Login returns a JWT token to be used in the `Authorization` header for all protected endpoints.
-- Logout is currently client-side; server-side logout endpoint available for future enhancement.
+## 2. Authentication Overview (Current — Phase 2)
 
-**Authorization Header Format:**
-Authorization: Bearer <JWT_TOKEN>
+- Registration and login use **basic email/password checks** — no token is issued yet.
+- All endpoints are currently open (no Spring Security enforcement on requests beyond what's noted).
+- **JWT-based authentication and authorization is planned for Phase 3** (see README "Next Steps").
+
+## 3. Resource Structure
+
+Most resources are nested under a user context:
+
+```
+/api/users/{userId}/categories
+/api/users/{userId}/categories/{categoryId}
+/api/users/{userId}/transactions
+/api/users/{userId}/transactions/{transactionId}
+/api/users/{userId}/dashboard
+```
+
+If `{userId}` does not correspond to an existing user, endpoints return an error (currently a generic exception — custom exception handling is planned for Phase 3).
+
 ---
 
-## 3. Auth Endpoints
+## 4. User Endpoints
 
-### 3.1 Signup
-- **Endpoint:** `/auth/signup`
+### 4.1 Register
+- **Endpoint:** `/api/users/register`
 - **Method:** POST
-- **Description:** Registers a new user.
-- **Request Headers:** `Content-Type: application/json`
 - **Request Body:**
 ```json
 {
   "name": "Tom",
   "email": "tom@mail.com",
-  "password": "tom201",
-  "preferred_currency": "USD"
+  "password": "tom201"
 }
 ```
 - **Success Response (201 Created):**
 ```json
 {
-"id": 1,
-"name": "Tom",
-"email": "tom@mail.com",
-"preferred_currency": "USD",
-"created_at": "2025-10-07T15:32:10Z"
+  "id": 1,
+  "name": "Tom",
+  "email": "tom@mail.com"
 }
 ```
-- **Error Responses:** 400 Bad Request, 409 Conflict, 500 Internal Server Error
-- **Notes:** Password is hashed before storing. Default currency is USD if not provided.
+- **Notes:** `preferredCurrency` defaults to `"USD"` on the entity but is not returned in the response — `UserResponse` currently includes only `id`, `name`, and `email`. Password is currently stored as plain text — hashing (BCrypt) is planned for Phase 3.
 
-### 3.2 Login
-- **Endpoint:** `/auth/login`
+### 4.2 Login
+- **Endpoint:** `/api/users/login`
 - **Method:** POST
-- **Description:** Logs in an existing user, returns JWT token.
 - **Request Body:**
 ```json
 {
@@ -56,165 +63,159 @@ Authorization: Bearer <JWT_TOKEN>
 - **Success Response (200 OK):**
 ```json
 {
-"id": 1,
-"name": "Tom",
-"email": "tom@mail.com",
-"preferred_currency": "USD",
-"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-"expires_in": 3600
-}
-```
-### 3.3 Logout
-- **Endpoint:** `/auth/logout`
-- **Method:** POST
-- **Description:** Intended for future implementation to invalidate JWT token.
-
-## 4. User Endpoints
-### 4.1 Get User
-- **Endpoint:** `/users/{id}`
-- **Method:** GET
-- **Headers:** Authorization: Bearer <JWT_TOKEN>
-- **Path Params:** id - user ID
-- **Success Response:**
-```json
-{
   "id": 1,
   "name": "Tom",
-  "email": "tom@mail.com",
-  "preferred_currency": "USD",
-  "created_at": "2025-10-07T15:32:10Z"
+  "email": "tom@mail.com"
 }
 ```
-- **Errors:** 401 Unauthorized, 403 Forbidden, 404 Not Found
-### 4.2 Update User
-- **Endpoint:** `/users/{id}`
-- **Method:** PUT
-- **Headers:** Authorization: Bearer <JWT_TOKEN>
-- **Request Body:** Partial fields allowed.
-```json
-{
-  "name": "Tom Updated",
-  "email": "tom@mail.com",
-  "preferred_currency": "USD"
-}
-```
-- **Success Response:** Returns updated user info.
-- **Errors:** 401 Unauthorized, 403 Forbidden, 400/409/500
+- **Notes:** No token is returned. JWT-based login response is planned for Phase 3.
 
-### 4.3 Delete User
-- **Endpoint:** `/users/{id}`
-- **Method:** DELETE
-- **Headers:** Authorization: Bearer <JWT_TOKEN>
-- **Success Response:**
-```json
-{
-"message": "User account deleted successfully.",
-"timestamp": "2025-10-22T12:45:30Z"
-}
-```
+---
+
 ## 5. Category Endpoints
-### 5.1 Get All Categories
-- **Endpoint:** `/categories`
-- **Method:** GET
-- **Headers:** Authorization: Bearer <JWT_TOKEN>
-- **Success Response:**
-```json
- [
-  { "id": 1, "name": "Salary", "type": "income" },
-  { "id": 2, "name": "Groceries", "type": "expense" }
- ]
-```
-### 5.2 Get Category by ID
-- **Endpoint:** `/categories/{id}`
-- **Method:** GET
 
-### 5.3 Create Category
-- **Endpoint:** `/categories`
+All category endpoints are scoped to a user: `/api/users/{userId}/categories`
+
+### 5.1 Create Category
+- **Endpoint:** `/api/users/{userId}/categories`
 - **Method:** POST
 - **Request Body:**
 ```json
 {
-"name": "Gifts",
-"type": "expense"
+  "name": "Gifts",
+  "type": "EXPENSE"
 }
 ```
-- **Success Response:** Returns created category info.
+- **Success Response (201 Created):**
+```json
+{
+  "id": 12,
+  "name": "Gifts",
+  "type": "EXPENSE",
+  "global": false
+}
+```
+- **Notes:** Creates a user-owned category. Global (system-default) categories are not created via this endpoint.
+
+### 5.2 Get All Categories
+- **Endpoint:** `/api/users/{userId}/categories`
+- **Method:** GET
+- **Success Response (200 OK):** Returns all global categories plus the user's own categories.
+```json
+[
+  { "id": 1, "name": "Food", "type": "EXPENSE", "global": true },
+  { "id": 12, "name": "Gifts", "type": "EXPENSE", "global": false }
+]
+```
+
+### 5.3 Get Category by ID
+- **Endpoint:** `/api/users/{userId}/categories/{categoryId}`
+- **Method:** GET
+- **Success Response (200 OK):**
+```json
+{ "id": 12, "name": "Gifts", "type": "EXPENSE", "global": false }
+```
+
 ### 5.4 Update Category
-- **Endpoint:** `/categories/{id}`
+- **Endpoint:** `/api/users/{userId}/categories/{categoryId}`
 - **Method:** PUT
-- **Notes:** Only user-created categories can be updated.
+- **Request Body:** Only `name` can be updated — `type` is immutable.
+```json
+{ "name": "Birthday Gifts" }
+```
+- **Success Response (200 OK):**
+```json
+{ "id": 12, "name": "Birthday Gifts", "type": "EXPENSE", "global": false }
+```
 
 ### 5.5 Delete Category
-- **Endpoint:** `/categories/{id}`
+- **Endpoint:** `/api/users/{userId}/categories/{categoryId}`
 - **Method:** DELETE
-- **Notes:** Default categories cannot be deleted; user can delete only own categories.
+- **Success Response:** 204 No Content
+- **Notes:** Fails if any transactions reference this category (enforced in the service layer).
+
+---
 
 ## 6. Transaction Endpoints
-### 6.1 Get All Transactions
-- **Endpoint:** `/transactions`
-- **Method:** GET
-- **Query Parameters:** startDate, endDate, category, type, limit
-- **Success Response:** Returns list of transactions.
 
-### 6.2 Get Transaction by ID
-- **Endpoint:** `/transactions/{id}`
-- **Method:** GET
+All transaction endpoints are scoped to a user: `/api/users/{userId}/transactions`
 
-### 6.3 Create Transaction
-- **Endpoint:** `/transactions`
+### 6.1 Create Transaction
+- **Endpoint:** `/api/users/{userId}/transactions`
 - **Method:** POST
 - **Request Body:**
 ```json
 {
   "amount": 150.00,
-  "category_id": 6,
-  "description": "Birthday gift",
-  "txn_date": "2025-10-07"
+  "categoryId": 6,
+  "date": "2025-10-07",
+  "notes": "Birthday gift"
 }
 ```
-### 6.4 Update Transaction
-- **Endpoint:** `/transactions/{id}`
-- **Method:** PUT
+- **Success Response (201 Created):** Returns the created transaction, including the derived `type` from its category.
+- **Notes:** `type` is not part of the request — it is derived from the category's type. `amount` must be greater than zero; `date` cannot be in the future.
 
-### 6.5 Delete Transaction
-- **Endpoint:** `/transactions/{id}`
-- **Method:** DELETE
-
-## 7. Dashboard Endpoints
-### 7.1 Summary
-- **Endpoint:** `/dashboard/summary`
+### 6.2 Get All Transactions
+- **Endpoint:** `/api/users/{userId}/transactions`
 - **Method:** GET
-- **Success Response:**
+- **Success Response (200 OK):** Returns all transactions for the user.
+
+### 6.3 Update Transaction
+- **Endpoint:** `/api/users/{userId}/transactions/{transactionId}`
+- **Method:** PUT
+- **Request Body:** Only `amount`, `date`, and `notes` can be updated.
 ```json
 {
-  "total_income": 4500.00,
-  "total_expense": 3200.00,
-  "balance": 1300.00
+  "amount": 175.00,
+  "date": "2025-10-08",
+  "notes": "Birthday gift (updated)"
 }
 ```
-### 7.2 Last 5 Transactions
-- **Endpoint:** `/dashboard/last5transactions`
+- **Notes:** `category`, `type`, and `user` are immutable after creation and cannot be changed via this endpoint.
+
+### 6.4 Delete Transaction
+- **Endpoint:** `/api/users/{userId}/transactions/{transactionId}`
+- **Method:** DELETE
+- **Success Response:** 204 No Content
+
+---
+
+## 7. Dashboard Endpoint
+
+### 7.1 Get Dashboard
+- **Endpoint:** `/api/users/{userId}/dashboard`
 - **Method:** GET
-- **Success Response:** Returns latest 5 transactions for the user.
+- **Query Parameters:** `month`, `year`
+- **Example:** `/api/users/1/dashboard?month=10&year=2025`
+- **Success Response (200 OK):**
 ```json
-[
-  {
-    "id": 101,
-    "amount": 120.00,
-    "category_id": 6,
-    "category_name": "Gifts",
-    "type": "expense",
-    "description": "Birthday gift",
-    "txn_date": "2025-10-07"
-  },
-  {
-    "id": 100,
-    "amount": 2500.00,
-    "category_id": 3,
-    "category_name": "Salary",
-    "type": "income",
-    "description": "Monthly salary",
-    "txn_date": "2025-10-05"
-  }
-]
+{
+  "totalIncome": 4500.00,
+  "totalExpense": 3200.00,
+  "netBalance": 1300.00,
+  "expenseByCategory": [
+    { "categoryId": 6, "categoryName": "Gifts", "totalAmount": 150.00 }
+  ],
+  "recentTransactions": [
+    {
+      "transactionId": 101,
+      "amount": 120.00,
+      "date": "2025-10-07",
+      "type": "EXPENSE",
+      "categoryName": "Gifts"
+    }
+  ]
+}
+```
+- **Notes:** This single endpoint replaces the separate `/dashboard/summary` and `/dashboard/last5transactions` endpoints originally planned in Phase 1. All dashboard data is aggregated via JPQL queries on the Transaction repository — there is no separate Dashboard entity or table.
+
+---
+
+## 8. Planned for Phase 3 (Not Yet Implemented)
+
+- JWT issuance on login and `Authorization: Bearer <token>` enforcement on protected endpoints
+- Custom exception types and consistent error response format via a global exception handler (`@ControllerAdvice`)
+- Bean validation error responses (currently only `@Valid` is applied on Transaction DTOs)
+- User update (`PUT /api/users/{userId}`) and delete endpoints — not yet implemented
+
 ```

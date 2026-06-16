@@ -87,7 +87,7 @@ Phase 2 expanded the application from project skeleton (Phase 1) into a working 
 
 ### Testing Status
 
-- **User and Category modules**: Manually tested end-to-end via Postman (signup, login, category CRUD)
+- **User and Category modules**: Manually tested end-to-end via Postman against a local sample database (signup, login, category CRUD) — test data created via SQL inserts and API calls
 - **Transaction and Dashboard modules**: Implemented and code-complete, but not yet tested
 
 ### Tech Debt — Deferred to Phase 3
@@ -133,7 +133,7 @@ Phase 3 will focus on:
 - Completing testing for Transaction and Dashboard modules
 - Implementing security (password hashing, JWT-based authentication & authorization)
 - Adding validation annotations, custom exceptions, and global exception handling
-- Additional features beyond MVP, testing, CI/CD integration, and production readiness
+- Adding seed/test data for easier local setup
 
 Phase 3 status will be tracked separately once work begins.
 

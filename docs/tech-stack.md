@@ -1,6 +1,6 @@
-# Finsight – Tech Stack & Dependencies
+# FinSight – Tech Stack & Dependencies
 
-This document describes the technologies, tools, and libraries used in the **Finsight – Personal Expense Tracker** project. It also includes the Maven dependencies currently used and the dependencies planned for Phase 2 enhancements (authentication, JWT, security).
+This document describes the technologies, tools, and libraries used in the **FinSight – Personal Expense Tracker** project. It also includes the Maven dependencies currently in use and the dependencies planned for Phase 3 enhancements (authentication, JWT, security).
 
 ---
 
@@ -14,7 +14,7 @@ This document describes the technologies, tools, and libraries used in the **Fin
 | **ORM** | Spring Data JPA (Hibernate) | Simplifies DB operations using repositories and entity mapping |
 | **Build Tool** | Maven | Project build and dependency management |
 | **API Documentation** | Springdoc OpenAPI (Swagger UI) | Interactive documentation for REST APIs |
-| **Validation** | Jakarta Validation | To validate request DTOs (amount > 0, date valid, etc.) |
+| **Validation** | Jakarta Validation | To validate request DTOs (amount > 0, valid dates, etc.) |
 | **Logging** | SLF4J + Logback | Logging, debugging, monitoring |
 | **Testing** | JUnit 5, Mockito | Unit + Integration testing framework |
 
@@ -33,10 +33,7 @@ This document describes the technologies, tools, and libraries used in the **Fin
 
 ## 3. Spring Boot Dependencies (pom.xml)
 
-Below are the dependencies included in the initial version of the project.
-
-### **Core Dependencies**
-
+### Core Dependencies
 ```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
@@ -48,7 +45,8 @@ Below are the dependencies included in the initial version of the project.
     <artifactId>spring-boot-starter-data-jpa</artifactId>
 </dependency>
 ```
-### **Database Driver**
+
+### Database Driver
 ```xml
 <dependency>
     <groupId>com.mysql</groupId>
@@ -56,14 +54,16 @@ Below are the dependencies included in the initial version of the project.
     <scope>runtime</scope>
 </dependency>
 ```
-### **Validation**
+
+### Validation
 ```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-validation</artifactId>
 </dependency>
 ```
-### **Lombok**
+
+### Lombok
 ```xml
 <dependency>
     <groupId>org.projectlombok</groupId>
@@ -71,7 +71,9 @@ Below are the dependencies included in the initial version of the project.
     <optional>true</optional>
 </dependency>
 ```
-### **Swagger / OpenAPI**
+> **Note:** Lombok is included in `pom.xml` but not yet utilized in Phase 2 — entities use explicit getters and setters. Lombok annotations may be adopted in Phase 3 as part of code quality improvements.
+
+### Swagger / OpenAPI
 ```xml
 <dependency>
     <groupId>org.springdoc</groupId>
@@ -79,7 +81,8 @@ Below are the dependencies included in the initial version of the project.
     <version>2.8.0</version>
 </dependency>
 ```
-### **Testing**
+
+### Testing
 ```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
@@ -88,21 +91,28 @@ Below are the dependencies included in the initial version of the project.
 </dependency>
 
 <dependency>
-<groupId>org.springframework.security</groupId>
-<artifactId>spring-security-test</artifactId>
-<scope>test</scope>
+    <groupId>org.springframework.security</groupId>
+    <artifactId>spring-security-test</artifactId>
+    <scope>test</scope>
 </dependency>
 ```
-## 4. Phase 2 Enhancements (Later)
-When we add authentication, the following dependencies will be introduced.
-### 4.1 **Spring Security**
+> **Note:** `spring-security-test` is included in anticipation of Phase 3 Spring Security integration. Security itself is not yet active in Phase 2.
+
+---
+
+## 4. Phase 3 Enhancements (Planned)
+
+When JWT-based authentication is implemented in Phase 3, the following dependencies will be introduced:
+
+### Spring Security
 ```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-security</artifactId>
 </dependency>
 ```
-### 4.2 **JWT Authentication (JJWT)**
+
+### JWT Authentication (JJWT)
 ```xml
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
@@ -124,15 +134,17 @@ When we add authentication, the following dependencies will be introduced.
     <scope>runtime</scope>
 </dependency>
 ```
+
+---
+
 ## 5. Summary
-The Finsight project uses a modern, production-ready tech stack with:
+
+FinSight uses a modern, production-ready tech stack with:
 
 - Spring Boot for backend development
 - MySQL as the relational database
 - Spring Data JPA for ORM
-- Swagger for API documentation
+- Swagger/OpenAPI for API documentation
 - JUnit/Mockito for testing
 - GitHub for version control
-- Optional future integration with Spring Security + JWT
-
-This stack ensures clean, scalable, maintainable architecture suitable for a real-world portfolio project.
+- Spring Security + JWT planned for Phase 3

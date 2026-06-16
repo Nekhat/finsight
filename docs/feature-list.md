@@ -17,7 +17,7 @@ These are the must-have features required to deliver the first working version o
    - Email
    - Preferred currency
 - Session persistence (remain logged in during active session)
-- Basic authentication (JWT optional in Phase 2)
+- Basic authentication (JWT-based authentication planned for Phase 3)
 
 ---
 ### **1.2 Expense & Income Tracking**

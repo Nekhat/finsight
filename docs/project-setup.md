@@ -1,9 +1,10 @@
-# Finsight – Project Setup Guide
+# FinSight – Project Setup Guide
 
-This document explains how to install, configure, and run the backend locally—including MySQL setup, application configuration, Swagger UI, and environment variables.
+This document explains how to install, configure, and run the backend locally — including MySQL setup, application configuration, Swagger UI, and environment variables.
 
 ## 1. Prerequisites
 Make sure the following tools are installed:
+
 **Required Software**
 - Java 24
 - Maven 3.9+
@@ -12,112 +13,143 @@ Make sure the following tools are installed:
 - Git
 - Postman (optional, for API testing)
 
-
 ## 2. Clone the Repository
-- Open a terminal or command prompt and run the following command to clone the repo:
-````
+Open a terminal or command prompt and run:
+```
 git clone <git-repo-url>
-````
-- Git will create a folder with the same name as your repository. This is your project folder.
-- Navigate into the project folder:
-````
-cd your-project-folder
-````
+```
+Git will create a folder with the same name as the repository. Navigate into it:
+```
+cd finsight
+```
 
-## 3. Database MySQL Setup
+## 3. Database (MySQL) Setup
+
 ### 3.1 Create Database
-- Log into MySQL:
-````
+Log into MySQL:
+```
 mysql -u root -p
-````
-
-- Create DB:
-````
-  CREATE DATABASE expense_tracker;
-````
-
-## 4. Configure Application Properties
-### 4.1 Edit src/main/resources/application.properties
-```properties
-pring.datasource.url=jdbc:mysql://localhost:3306/expense_tracker
-spring.datasource.username=root
-spring.datasource.password=YOUR_PASSWORD
-
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
-
-# Swagger/OpenAPI
-springdoc.api-docs.enabled=true
-springdoc.swagger-ui.enabled=true
 ```
-**Environment Variables (Optional)**
-Instead of storing the DB password in the file, you can set it:
+Create the database:
+```
+CREATE DATABASE finsight_db;
+```
+
+## 4. Configure Application Settings
+
+### 4.1 Edit `src/main/resources/application.yaml`
+
+The project uses a YAML configuration file. Update the datasource credentials to match your local MySQL setup:
+
+```yaml
+spring:
+  application:
+    name: Finsight
+  datasource:
+    url: jdbc:mysql://localhost:3306/finsight_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root            # replace with your MySQL username
+    password: admin123        # replace with your MySQL password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update         # "update" creates/updates tables automatically based on entities
+    show-sql: true              # shows SQL queries in console
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+logging:
+  level:
+    root: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# Swagger/OpenAPI config (Springdoc)
+springdoc:
+  api-docs:
+    path: /api-docs            # endpoint for JSON API spec
+  swagger-ui:
+    path: /swagger-ui.html      # UI for testing endpoints
+
+server:
+  port: 8080
+```
+
+**Environment Variables (Recommended for credentials)**
+
+Instead of storing the DB password directly in `application.yaml`, you can use an environment variable:
+
 - macOS/Linux:
-````
-  export DB_PASSWORD=yourpassword
-````
-- Windows PowerShell:
-````
-  setx DB_PASSWORD "yourpassword"
-````
-- Then update config as:
-```properties
-spring.datasource.password=${DB_PASSWORD}
 ```
+export DB_PASSWORD=yourpassword
+```
+- Windows PowerShell:
+```
+setx DB_PASSWORD "yourpassword"
+```
+Then reference it in `application.yaml`:
+```yaml
+spring:
+  datasource:
+    password: ${DB_PASSWORD}
+```
+
 ## 5. Build and Run the Spring Boot App
+
 ### 5.1 Run with Maven
-````
+```
 mvn spring-boot:run
-````
+```
 
 ### 5.2 Run from IntelliJ
-- Open IntelliJ → “Run” → “Run ExpenseTrackerApplication”
+- Open IntelliJ → "Run" → "Run FinsightApplication"
 - The application will start on:
-````
-  http://localhost:8080
-````
+```
+http://localhost:8080
+```
 
 ## 6. Access Swagger UI
-Once the application is running, open:
-````
-http://localhost:8080/swagger-ui.html
-````
 
-Here we will see:
-- All API endpoints
-- Request/response formats
-- Ability to test APIs directly
+Once the application is running, open:
+```
+http://localhost:8080/swagger-ui.html
+```
+Here you'll see all API endpoints, request/response formats, and can test endpoints directly.
+
+**Note:** Endpoints are nested under a user context (e.g. `/api/users/{userId}/categories`, `/api/users/{userId}/transactions`, `/api/users/{userId}/dashboard`). You'll need a valid `userId` (created via `/api/users/register`) to test most endpoints — see `api-contract.md` for full details.
 
 ## 7. Verify Database Tables
-When the app runs for the first time, Hibernate will create the tables automatically.
-Login to MySQL and check:
-````
-USE expense_tracker;
+
+When the app runs for the first time, Hibernate will create the tables automatically (`spring.jpa.hibernate.ddl-auto=update`). Log into MySQL and check:
+```
+USE finsight_db;
 SHOW TABLES;
-````
+```
 
-We should see:
-- user
-- category
-- expense
-(and more, depending on the project’s progress)
+You should see:
+- `users`
+- `categories`
+- `transactions`
 
-## 8. Troubleshooting
-❗ Common Issues
-| Issue                    | Fix                                                      |
-| ------------------------ | -------------------------------------------------------- |
-| Cannot connect to MySQL  | Check username/password; ensure MySQL service is running |
-| Port 8080 already in use | Change port: `server.port=8081`                          |
-| Table not created        | Ensure `spring.jpa.hibernate.ddl-auto=update`            |
-| Swagger not loading      | Visit `/swagger-ui/index.html` on Spring Boot 3          |
+## 8. Troubleshooting — Common Issues
 
-## 9. Future Notes (Phase 2 – JWT)
-When authentication is added later, we will create more environment variables:
-- JWT_SECRET
-- JWT_EXPIRATION
-- JWT_REFRESH_EXPIRATION
-These will be set in our OS and accessed using:
-````
-  jwt.secret=${JWT_SECRET}
-````
+| Issue | Fix |
+|-------|-----|
+| Cannot connect to MySQL | Check username/password in `application.yaml`; ensure MySQL service is running |
+| Port 8080 already in use | Change `server.port` in `application.yaml` |
+| Tables not created | Confirm `spring.jpa.hibernate.ddl-auto=update` |
+| Swagger not loading | Visit `/swagger-ui/index.html` (Spring Boot 3 default path) if `/swagger-ui.html` doesn't load |
+
+## 9. Future Notes (Phase 3 — JWT)
+
+When JWT-based authentication is implemented in Phase 3, additional environment variables will be introduced:
+- `JWT_SECRET`
+- `JWT_EXPIRATION`
+- `JWT_REFRESH_EXPIRATION`
+
+These will be set in the OS environment and referenced in `application.yaml`, e.g.:
+```yaml
+jwt:
+  secret: ${JWT_SECRET}
+```
