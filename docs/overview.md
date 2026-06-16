@@ -105,6 +105,6 @@ See the main `README.md` for full phase-by-phase status and next steps.
 ## 📌 Author
 **Nekhat Perveen**
 
-Java backend development portfolio project
+Built as part of a technical upskilling initiative to deepen backend development knowledge during a career break.
 
 2025 – Present
