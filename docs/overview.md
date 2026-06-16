@@ -104,5 +104,7 @@ See the main `README.md` for full phase-by-phase status and next steps.
 
 ## 📌 Author
 **Nekhat Perveen**
+
 Java backend development portfolio project
+
 2025 – Present
